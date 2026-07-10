@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aurora Gateway — OSS vs Enterprise</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    @font-face {
+      font-family: 'Voga';
+      src: url('fonts/Voga-Medium.woff2') format('woff2');
+      font-weight: 500;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #0b0a0e;
+      display: flex;
+      justify-content: center;
+      padding: 48px 0px;
+      color: #e8e6e3;
+      -webkit-font-smoothing: antialiased;
+      font-weight: 450;
+      font-size: 14px;
+      letter-spacing: normal;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1380px;
+      width: 100%;
+      padding: 0 24px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .header .eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: #6b6a6f;
+      margin-bottom: 8px;
+    }
+
+    .header .eyebrow span {
+      display: inline-block;
+      width: 20px;
+      height: 1px;
+      background: #6b6a6f;
+      vertical-align: middle;
+      margin: 0 10px;
+    }
+
+    .header h1 {
+      font-family: 'Voga', Georgia, serif;
+      font-size: 42px;
+      font-weight: 500;
+      letter-spacing: 1.5px;
+      color: #e8e6e3;
+      margin-bottom: 6px;
+    }
+
+    .header h1 .accent {
+      color: #6AD87A;
+    }
+
+    .header p {
+      font-size: 14px;
+      color: #6b6a6f;
+    }
+
+    .pricing-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .pricing-card {
+      border-radius: 0;
+      padding: 32px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    .pricing-card.oss-card {
+      border-color: rgba(0, 210, 150, 0.12);
+      background: rgba(0, 210, 150, 0.02);
+    }
+
+    .pricing-card.ent-card {
+      border-color: rgba(124, 109, 240, 0.12);
+      background: rgba(124, 109, 240, 0.02);
+    }
+
+    .pricing-card .tier-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .pricing-card.oss-card .tier-icon {
+      background: rgba(0, 210, 150, 0.08);
+    }
+
+    .pricing-card.ent-card .tier-icon {
+      background: rgba(124, 109, 240, 0.08);
+    }
+
+    .pricing-card .tier-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .pricing-card.oss-card .tier-label { color: #00d296; }
+    .pricing-card.ent-card .tier-label { color: #7c6df0; }
+
+    .pricing-card h2 {
+      font-family: 'Voga', Georgia, serif;
+      font-size: 22px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      margin-bottom: 2px;
+      color: #e8e6e3;
+    }
+
+    .pricing-card .price {
+      font-size: 11.7px;
+      color: #6b6a6f;
+      margin-bottom: 16px;
+    }
+
+    .pricing-card .price strong {
+      font-weight: 600;
+    }
+
+    .pricing-card.oss-card .price strong { color: #00d296; }
+    .pricing-card.ent-card .price strong { color: #7c6df0; }
+
+    .pricing-card .desc {
+      font-size: 12.15px;
+      color: #8b8a8f;
+      line-height: 1.7;
+      font-weight: 400;
+      margin-bottom: 16px;
+    }
+
+    .pricing-card .pill {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 0;
+    }
+
+    .pricing-card.oss-card .pill {
+      background: rgba(0, 210, 150, 0.06);
+      color: #00d296;
+    }
+
+    .pricing-card.ent-card .pill {
+      background: rgba(124, 109, 240, 0.06);
+      color: #7c6df0;
+    }
+
+    .table-wrap {
+      border-radius: 0;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      padding: 18px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    thead th:first-child { color: #6b6a6f; }
+    thead th:nth-child(2) { color: #00d296; text-align: center; width: 72px; }
+    thead th:nth-child(3) { color: #7c6df0; text-align: center; width: 72px; }
+
+    tbody td {
+      padding: 14px 16px;
+      font-size: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: middle;
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+
+    tbody td:first-child {
+      color: #d4d2ce;
+      font-weight: 450;
+    }
+
+    tbody td:nth-child(2),
+    tbody td:nth-child(3) {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .category-row td {
+      padding: 24px 24px 6px !important;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px !important;
+      font-weight: 500 !important;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: #55545a !important;
+      background: transparent !important;
+      border-bottom: none !important;
+    }
+
+    .category-row:hover { background: transparent !important; }
+
+    .feature-sublabel {
+      color: #6b6a6f;
+      font-size: 12px;
+      font-weight: 400;
+    }
+
+    .check {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 0;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    .check.yes {
+      background: rgba(0, 210, 150, 0.1);
+      color: #00d296;
+    }
+
+    .check.no {
+      background: rgba(255, 255, 255, 0.03);
+      color: #3a3940;
+    }
+
+    .check.coming {
+      background: rgba(255, 200, 50, 0.08);
+      color: #c8a830;
+    }
+
+    .footer {
+      margin-top: 40px;
+      padding: 28px 32px;
+      border-radius: 0;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    .footer h3 {
+      font-family: 'Voga', Georgia, serif;
+      font-size: 20px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+      color: #e8e6e3;
+    }
+
+    .footer p {
+      font-size: 13.5px;
+      color: #6b6a6f;
+      line-height: 1.7;
+    }
+
+    @media (max-width: 720px) {
+      .pricing-row { grid-template-columns: 1fr; gap: 16px; }
+      .header h1 { font-size: 32px; }
+      thead th, tbody td { padding: 10px 14px; font-size: 12px; }
+      tbody td:nth-child(2), tbody td:nth-child(3) { width: 40px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="eyebrow">
+        <span></span> Edition Comparison <span></span>
+      </div>
+      <h1>Aurora <span class="accent">Gateway</span></h1>
+      <p>Open-source AI gateway for everyone, from solo builders shipping their first integrations to platform teams standardizing routing, caching, governance, observability, and cost control across large-scale AI deployments.</p>
+    </div>
+
+    <div class="pricing-row">
+      <div class="pricing-card oss-card">
+        <div class="tier-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00d296" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+            <path d="M2 17l10 5 10-5" />
+            <path d="M2 12l10 5 10-5" />
+          </svg>
+        </div>
+        <div class="tier-label">Open Source</div>
+        <h2>Aurora OSS</h2>
+        <div class="price">Price: <strong>Free</strong> &mdash; Apache 2.0 License</div>
+        <div class="desc">Core AI gateway with broad provider coverage, OpenAI-compatible and Anthropic-compatible ingress, semantic caching, guardrails, audit logging, usage analytics, and an embedded admin dashboard. Ideal for local development, internal tooling, and self-hosted production rollouts.</div>
+        <div class="pill">For developers &amp; small teams</div>
+      </div>
+      <div class="pricing-card ent-card">
+        <div class="tier-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7c6df0" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" />
+            <path d="M7 11V7a5 5 0 0110 0v4" />
+          </svg>
+        </div>
+        <div class="tier-label">Enterprise</div>
+        <h2>Aurora Enterprise</h2>
+        <div class="price">Price: <strong>Custom</strong> &mdash; Signed commercial license</div>
+        <div class="desc">Everything in OSS plus SSO, RBAC, multi-tenant isolation, spend budgets, HA clustering, compliance controls, observability exports, adaptive routing, advanced guardrails, and priority support. Built for organizations that need governance, stronger security boundaries, and predictable controls at scale.</div>
+        <div class="pill">For organizations at scale</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>OSS</th>
+            <th>Enterprise</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="category-row">
+            <td colspan="3">Core Gateway</td>
+          </tr>
+          <tr>
+            <td>OpenAI-compatible API <span class="feature-sublabel">&nbsp;/v1/chat/completions, /v1/responses, /v1/embeddings, /v1/models</span></td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>Anthropic Messages ingress <span class="feature-sublabel">&nbsp;/v1/messages</span></td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>Files &amp; batches <span class="feature-sublabel">&nbsp;/v1/files, /v1/batches</span></td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>Provider passthrough <span class="feature-sublabel">&nbsp;/p/{provider}/*</span></td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+
+          <tr class="category-row">
+            <td colspan="3">Provider Support</td>
+          </tr>
+          <tr>
+            <td>15+ provider integrations <span class="feature-sublabel">&nbsp;OpenAI, Anthropic, Gemini, Groq, DeepSeek, OpenRouter, xAI, Z.ai, Azure, Oracle, Ollama, vLLM, MiniMax, etc.</span></td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>Auto-discovery via environment variables</td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>Provider pools with health-aware routing <span class="feature-sublabel">&nbsp;round_robin in OSS</span></td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>Adaptive / latency-aware / weighted pool routing</td>
+            <td><span class="check no">○</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+
+          <tr class="category-row">
+            <td colspan="3">Caching</td>
+          </tr>
+          <tr>
+            <td>Exact response cache <span class="feature-sublabel">&nbsp;Redis, key-based</span></td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>Semantic response cache <span class="feature-sublabel">&nbsp;Qdrant, pgvector, Pinecone, Weaviate</span></td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>Prompt cache <span class="feature-sublabel">&nbsp;input deduplication, auto/manual/off modes</span></td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+
+          <tr class="category-row">
+            <td colspan="3">Routing &amp; Model Management</td>
+          </tr>
+          <tr>
+            <td>Model aliases, overrides, and pricing metadata</td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>Fallback routing &amp; config-driven workflows</td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>Model combinations <span class="feature-sublabel">&nbsp;multi-model orchestration</span></td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>Token saver <span class="feature-sublabel">&nbsp;policy-driven output compression</span></td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>Resilience <span class="feature-sublabel">&nbsp;retry with backoff, circuit breaker, health-aware routing</span></td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+
+          <tr class="category-row">
+            <td colspan="3">Security &amp; Access Control</td>
+          </tr>
+          <tr>
+            <td>Master key authentication &amp; managed API keys <span class="feature-sublabel">&nbsp;scoped per provider/model/user-path</span></td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>Rate limiting <span class="feature-sublabel">&nbsp;in-memory + Redis</span></td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>OIDC SSO <span class="feature-sublabel">&nbsp;Google, Microsoft, Okta, any OpenID provider</span></td>
+            <td><span class="check no">○</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>RBAC with custom roles &amp; permissions <span class="feature-sublabel">&nbsp;user management, permission-gated routes</span></td>
+            <td><span class="check no">○</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+
+          <tr class="category-row">
+            <td colspan="3">Multi-Tenant Isolation</td>
+          </tr>
+          <tr>
+            <td>Tenant workspaces with per-tenant data isolation</td>
+            <td><span class="check no">○</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>Tenant lifecycle management <span class="feature-sublabel">&nbsp;CRUD, suspend, activate, slug-based routing</span></td>
+            <td><span class="check no">○</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+
+          <tr class="category-row">
+            <td colspan="3">Guardrails</td>
+          </tr>
+          <tr>
+            <td>System prompt injection / override / decoration</td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>LLM-based content altering &amp; anonymization <span class="feature-sublabel">&nbsp;uses auxiliary model — cost-incurring</span></td>
+            <td><span class="check no">○</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>Regex blocking, PII redaction, length limits</td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>Advanced guardrail rules <span class="feature-sublabel">&nbsp;provider-backed rulesets, extended policy types</span></td>
+            <td><span class="check no">○</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+
+          <tr class="category-row">
+            <td colspan="3">Audit &amp; Compliance</td>
+          </tr>
+          <tr>
+            <td>Request/response capture, live SSE stream, retention</td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>Immutable audit logs &amp; data residency controls</td>
+            <td><span class="check no">○</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>Compliance controls <span class="feature-sublabel">&nbsp;PII policy, evidence retention, access review</span></td>
+            <td><span class="check no">○</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+
+          <tr class="category-row">
+            <td colspan="3">Usage &amp; Cost Analytics</td>
+          </tr>
+          <tr>
+            <td>Per-request token &amp; cost tracking, daily/by-model aggregation</td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>Spend budgets with enforcement <span class="feature-sublabel">&nbsp;hourly/daily/weekly limits, alerts, webhooks, forecasts</span></td>
+            <td><span class="check no">○</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+
+          <tr class="category-row">
+            <td colspan="3">Clustering &amp; High Availability</td>
+          </tr>
+          <tr>
+            <td>Single-node deployment</td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>Multi-node clustering <span class="feature-sublabel">&nbsp;gossip protocol, leader election, automatic failover, cross-region</span></td>
+            <td><span class="check no">○</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+
+          <tr class="category-row">
+            <td colspan="3">Observability &amp; Exports</td>
+          </tr>
+          <tr>
+            <td>Prometheus metrics, Grafana dashboard, Swagger docs</td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>Go pprof profiling <span class="feature-sublabel">&nbsp;/debug/pprof/</span></td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>OTLP / Datadog / Webhook / S3 exports</td>
+            <td><span class="check no">○</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+
+          <tr class="category-row">
+            <td colspan="3">MCP (Model Context Protocol)</td>
+          </tr>
+          <tr>
+            <td>MCP tool registry &amp; agent integration <span class="feature-sublabel">&nbsp;governed tool connections for coding agents</span></td>
+            <td><span class="check coming">～</span></td>
+            <td><span class="check coming">～</span></td>
+          </tr>
+
+          <tr class="category-row">
+            <td colspan="3">Admin Dashboard</td>
+          </tr>
+          <tr>
+            <td>Provider, model, guardrail, workflow management</td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>Managed API key &amp; pricing administration</td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>Live console stream &amp; audit log viewer</td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>Budget, tenant, identity management UIs</td>
+            <td><span class="check no">○</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+
+          <tr class="category-row">
+            <td colspan="3">Infrastructure</td>
+          </tr>
+          <tr>
+            <td>Storage <span class="feature-sublabel">&nbsp;SQLite (default), PostgreSQL, MongoDB</span></td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>Docker Compose <span class="feature-sublabel">&nbsp;Redis, PostgreSQL, Qdrant, Prometheus, Grafana</span></td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>Helm chart for Kubernetes</td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>CLI tools <span class="feature-sublabel">&nbsp;aurora init, update, uninstall, models sync/diff/show</span></td>
+            <td><span class="check yes">●</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+          <tr>
+            <td>License enforcement &amp; advanced HTTP client</td>
+            <td><span class="check no">○</span></td>
+            <td><span class="check yes">●</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="footer">
+      <h3>Need Enterprise?</h3>
+      <p>Enterprise extends the open-source gateway with identity federation, tenant-aware governance, compliance-oriented controls, budget enforcement, adaptive routing, clustering, richer observability exports, MCP tooling, and dedicated support for teams operating Aurora as shared production infrastructure.</p>
+    </div>
+  </div>
+</body>
+</html>

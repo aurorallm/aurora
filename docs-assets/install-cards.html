@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aurora Gateway — Quick Install</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@500;600;700;800&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Instrument Sans', sans-serif;
+    background: #0b0a0e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+    color: #e8e6e3;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container {
+    max-width: 1100px;
+    width: 100%;
+    position: relative;
+  }
+
+  .grain {
+    position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat; background-size: 256px 256px;
+  }
+  .bg-orb {
+    position: fixed; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0;
+  }
+  .bg-orb.o1 { top: -20%; right: -10%; width: 500px; height: 500px; background: radial-gradient(circle, rgba(106,216,122,0.06) 0%, transparent 70%); }
+  .bg-orb.o2 { bottom: -20%; left: -10%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(124,109,240,0.05) 0%, transparent 70%); }
+
+  .header {
+    margin-bottom: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .terminal {
+    border-radius: 20px;
+    background: rgba(0,0,0,0.45);
+    border: 1px solid rgba(255,255,255,0.06);
+    backdrop-filter: blur(8px);
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+    animation: fadeUp 0.5s ease;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .terminal .titlebar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.02);
+  }
+  .terminal .dots {
+    display: flex; gap: 8px;
+  }
+  .terminal .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+  }
+  .terminal .dot.r { background: #ff5f56; }
+  .terminal .dot.y { background: #ffbd2e; }
+  .terminal .dot.g { background: #27c93f; }
+  .terminal .titlebar-label {
+    font-family: 'DM Mono', monospace; font-size: 12px; color: #6b6a6f; margin-left: 4px;
+  }
+  .terminal .titlebar-label span { color: #8b8a8f; }
+
+  .terminal .body {
+    padding: 24px 24px 20px;
+  }
+
+  .terminal .tab-bar {
+    display: flex; gap: 4px; margin-bottom: 20px;
+  }
+  .terminal .tab {
+    font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500;
+    padding: 7px 16px; border-radius: 8px; cursor: pointer;
+    letter-spacing: 0.5px; user-select: none;
+    transition: all 0.15s;
+  }
+  .terminal .tab.active-npm {
+    background: rgba(106,216,122,0.12); color: #6AD87A; border: 1px solid rgba(106,216,122,0.2);
+  }
+  .terminal .tab.active-docker {
+    background: rgba(124,109,240,0.12); color: #7c6df0; border: 1px solid rgba(124,109,240,0.2);
+  }
+  .terminal .tab.inactive {
+    color: #6b6a6f; background: rgba(255,255,255,0.03); border: 1px solid transparent;
+  }
+  .terminal .tab.inactive:hover {
+    background: rgba(255,255,255,0.06);
+  }
+
+  .panel {
+    display: none;
+  }
+  .panel.active {
+    display: block;
+  }
+
+  .terminal .line {
+    display: flex; align-items: flex-start; gap: 12px;
+    margin-bottom: 6px;
+  }
+  .terminal .line:last-child { margin-bottom: 0; }
+  .terminal .prompt-symbol {
+    font-family: 'DM Mono', monospace; font-size: 13px; color: #6b6a6f;
+    line-height: 1.8; flex-shrink: 0; width: 14px;
+  }
+  .terminal .prompt-symbol.root { color: #ef4444; }
+  .terminal .cmd-text {
+    font-family: 'DM Mono', monospace; font-size: 13px; line-height: 1.8;
+    color: #d4d2ce;
+  }
+  .terminal .cmd-text .kw { color: #6AD87A; }
+  .terminal .cmd-text .str { color: #f0c674; }
+  .terminal .cmd-text .cmt { color: #6b6a6f; }
+  .terminal .cmd-text .dim { color: #6b6a6f; }
+  .terminal .cmd-text .line-cont { color: #6b6a6f; }
+
+  .terminal .output-line {
+    display: flex; align-items: flex-start; gap: 12px;
+    margin-bottom: 4px;
+    opacity: 0; transform: translateY(4px);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
+  .terminal .output-line.visible {
+    opacity: 1; transform: translateY(0);
+  }
+  .terminal .output-line .out {
+    font-family: 'DM Mono', monospace; font-size: 12.5px; line-height: 1.6;
+    color: #6b6a6f;
+  }
+  .terminal .output-line .out.green { color: #6AD87A; }
+  .terminal .output-line .out.purple { color: #7c6df0; }
+
+  .terminal .blink-cursor {
+    display: inline-block; width: 7px; height: 15px; background: #6AD87A;
+    margin-left: 4px; vertical-align: middle;
+    animation: blink 1s step-end infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .terminal .footer-note {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255,255,255,0.04);
+    font-size: 13px; color: #6b6a6f; line-height: 1.6;
+  }
+  .terminal .footer-note strong { color: #d4d2ce; font-weight: 500; }
+
+  @media (max-width: 600px) {
+    .header h1 { font-size: 26px; }
+    .terminal .body { padding: 16px; }
+    .terminal .cmd-text { font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="bg-orb o1"></div>
+<div class="bg-orb o2"></div>
+
+<div class="container">
+  <div class="header">
+
+  <div class="terminal">
+    <div class="titlebar">
+      <div class="dots">
+        <div class="dot r"></div>
+        <div class="dot y"></div>
+        <div class="dot g"></div>
+      </div>
+      <div class="titlebar-label"><span>aurora</span> — bash — 120×40</div>
+    </div>
+
+    <div class="body">
+      <div class="tab-bar">
+        <div class="tab active-npm" data-tab="npm" onclick="switchTab('npm')">npm</div>
+        <div class="tab inactive" data-tab="docker" onclick="switchTab('docker')">docker</div>
+      </div>
+
+      <!-- NPM PANEL -->
+      <div id="panel-npm" class="panel active">
+        <div class="line">
+          <div class="prompt-symbol">$</div>
+          <div class="cmd-text">npm install -g <span class="kw">iaurora</span></div>
+        </div>
+        <div class="output-line"><div class="out dim">changed 1 package in 3s</div></div>
+
+        <div class="line">
+          <div class="prompt-symbol">$</div>
+          <div class="cmd-text"><span class="kw">aurora</span> init</div>
+        </div>
+        <div class="output-line"><div class="out green">created</div><div class="out">config.yaml</div></div>
+        <div class="output-line"><div class="out green">created</div><div class="out">.env</div></div>
+        <div class="output-line"><div class="out green">created</div><div class="out">data/user_pricing.yaml</div></div>
+        <div class="output-line" style="margin-bottom:4px;"><div class="out green">created</div><div class="out">configs/fallback.json</div></div>
+        <div class="output-line" style="margin-bottom:4px;"><div class="out" style="color:#6b6a6f;">Aurora gateway initialized</div></div>
+        <div class="output-line" style="margin-bottom:8px;">
+          <div class="out dim"></div>
+          <div class="out dim">Next steps: 1. Edit .env with your API keys &nbsp;2. Run: aurora</div>
+        </div>
+
+        <div class="line">
+          <div class="prompt-symbol">$</div>
+          <div class="cmd-text"><span class="kw">aurora</span></div>
+        </div>
+        <div class="output-line"><div class="out green">●</div><div class="out">Aurora Gateway 1.0.23 — oss edition</div></div>
+        <div class="output-line"><div class="out green">●</div><div class="out">3 providers loaded (groq, openai, anthropic)</div></div>
+        <div class="output-line"><div class="out green">●</div><div class="out">Storage: sqlite &nbsp;· &nbsp;Caching: redis (exact) + qdrant (semantic)</div></div>
+        <div class="output-line" style="margin-bottom:4px;"><div class="out purple">→</div><div class="out purple">Listening on :8080</div></div>
+      </div>
+
+      <!-- DOCKER PANEL -->
+      <div id="panel-docker" class="panel">
+        <div class="line">
+          <div class="prompt-symbol root">#</div>
+          <div class="cmd-text">docker run --rm -p 8080:8080 <span class="line-cont">\</span></div>
+        </div>
+        <div class="line">
+          <div class="prompt-symbol" style="visibility:hidden;">#</div>
+          <div class="cmd-text"><span class="dim">  -e</span> AURORA_MASTER_KEY=<span class="str">"your-key"</span> <span class="line-cont">\</span></div>
+        </div>
+        <div class="line">
+          <div class="prompt-symbol" style="visibility:hidden;">#</div>
+          <div class="cmd-text"><span class="dim">  -e</span> GROQ_API_KEY=<span class="str">"gsk_..."</span> <span class="line-cont">\</span></div>
+        </div>
+        <div class="line">
+          <div class="prompt-symbol" style="visibility:hidden;">#</div>
+          <div class="cmd-text"><span class="dim">  -e</span> OPENAI_API_KEY=<span class="str">"sk-..."</span> <span class="line-cont">\</span></div>
+        </div>
+        <div class="line" style="margin-bottom:12px;">
+          <div class="prompt-symbol" style="visibility:hidden;">#</div>
+          <div class="cmd-text">aurorahq/aurora</div>
+        </div>
+
+        <div class="output-line"><div class="out green">●</div><div class="out">Aurora Gateway 1.0.23 — oss edition</div></div>
+        <div class="output-line"><div class="out green">●</div><div class="out">2 providers loaded (groq, openai)</div></div>
+        <div class="output-line"><div class="out green">●</div><div class="out">Storage: sqlite</div></div>
+        <div class="output-line"><div class="out purple">→</div><div class="out purple">Listening on :8080</div></div>
+        <div class="output-line" style="margin-bottom:4px;">
+          <div class="out dim"></div>
+          <div class="out dim">docker compose --profile app up -d &nbsp;for full stack</div>
+        </div>
+      </div>
+
+      <div class="line" style="margin-top:12px;">
+        <div class="prompt-symbol">$</div>
+        <div class="cmd-text"><span class="blink-cursor"></span></div>
+      </div>
+
+      <div class="footer-note">
+        Gateway ready at <strong>http://localhost:8080</strong> · API: <strong>/v1/chat/completions</strong> · Dashboard: <strong>/admin/dashboard</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let typeTimers = [];
+
+  function switchTab(tab) {
+    typeTimers.forEach(t => { clearTimeout(t); clearInterval(t); });
+    typeTimers = [];
+
+    document.querySelectorAll('.tab').forEach(t => {
+      t.classList.remove('active-npm', 'active-docker');
+      t.classList.add('inactive');
+    });
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+
+    const activeTab = document.querySelector(`.tab[data-tab="${tab}"]`);
+    activeTab.classList.remove('inactive');
+    activeTab.classList.add(tab === 'npm' ? 'active-npm' : 'active-docker');
+
+    const panel = document.getElementById(`panel-${tab}`);
+    resetPanel(panel);
+    panel.classList.add('active');
+    animatePanel(panel);
+  }
+
+  function resetPanel(panel) {
+    panel.querySelectorAll('.output-line').forEach(el => el.classList.remove('visible'));
+    panel.querySelectorAll('.cmd-text').forEach(el => {
+      if (el.dataset.html) el.innerHTML = '';
+    });
+  }
+
+  function animatePanel(panel) {
+    const cmdLines = panel.querySelectorAll('.line');
+    let totalDelay = 400;
+    const charSpeed = 30;
+
+    cmdLines.forEach(line => {
+      const cmdText = line.querySelector('.cmd-text');
+      if (!cmdText) return;
+
+      if (!cmdText.dataset.html) {
+        cmdText.dataset.html = cmdText.innerHTML;
+        cmdText.dataset.text = cmdText.textContent;
+      }
+
+      const rawText = cmdText.dataset.text;
+      if (!rawText || rawText.trim() === '') return;
+
+      const origHTML = cmdText.dataset.html;
+
+      let outputLines = [];
+      let el = line.nextElementSibling;
+      while (el && !el.classList.contains('line')) {
+        if (el.classList.contains('output-line')) outputLines.push(el);
+        el = el.nextElementSibling;
+      }
+
+      const typingDuration = rawText.length * charSpeed;
+
+      const t = setTimeout(() => {
+        cmdText.innerHTML = '';
+        let i = 0;
+        const interval = setInterval(() => {
+          if (i < rawText.length) {
+            cmdText.textContent += rawText[i];
+            i++;
+          } else {
+            clearInterval(interval);
+            cmdText.innerHTML = origHTML;
+            outputLines.forEach((ol, oi) => {
+              const t2 = setTimeout(() => ol.classList.add('visible'), oi * 80);
+              typeTimers.push(t2);
+            });
+          }
+        }, charSpeed);
+        typeTimers.push(interval);
+      }, totalDelay);
+      typeTimers.push(t);
+
+      totalDelay += typingDuration + 300 + outputLines.length * 80;
+    });
+  }
+
+  function initPanels() {
+    document.querySelectorAll('.panel .cmd-text').forEach(el => {
+      if (!el.dataset.html) {
+        el.dataset.html = el.innerHTML;
+        el.dataset.text = el.textContent;
+      }
+      el.innerHTML = '';
+    });
+    document.querySelectorAll('.output-line').forEach(el => el.classList.remove('visible'));
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    initPanels();
+    const activePanel = document.querySelector('.panel.active');
+    if (activePanel) animatePanel(activePanel);
+  });
+</script>
+</body>
+</html>
